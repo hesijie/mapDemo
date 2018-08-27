@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>调用地图APP</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="renderer" content="webkit">
+    <meta name="format-detection" content="telephone=no"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <script>
+        var map_load = "0";
+        var location_now = 'setting';
+        var vistor_page = 'profile';
+    </script>
+    <style type="text/css">
+        ul{padding: 0;}
+        .mapList{width:250px;overflow:hidden;padding-top:10px;text-align:center;list-style: none;margin: 20px auto;background-color: #ffffff;color: #000000;}
+        .mapLi{
+            width:100%;background-color:#e2e2e2;font-size:18px;color:#000000;text-align: center;margin-bottom: 10px;display: none;padding:10px 0;
+        }
+        .map{
+           font-size:18px;color:#000000;padding:5px;list-style: none;display: inline;
+        }
+        .isValidate{padding: 10px 15px;background-color: #0bb59b;border-radius: 5px;border:0;box-shadow: none;outline: none;text-align: center;color:#ffffff;}
+        .place{margin: 10px;}
+    </style>
+</head>
+<body>
+<h3>设定当前位置及目的地位置的经纬度及中文名称</h3>
+<div class='place'>起始地：当前位置(北四环东路 望和路 纬度:39.98871 经度:116.43234)</div>
+<div class='place'>目的地:故宫博物馆(纬度:39.9168 经度:116.3908)</div>
+<div><button class="isValidate" onclick="haveInstalledApp()">检测你当前已安装的地图APP</button></div>
+<h3>你的手机已安装的地图APP有:</h3>
+<ul class="mapList">
+    <li onclick="checkBaidu()" class="mapLi">百度地图导航</li>
+    <li onclick="checkGaode()" class="mapLi">高德地图导航</li><!-- 直接通过APP导航 -->
+    <li onclick="checkTengxun()" class="mapLi">腾讯地图导航</li>
+    <li onclick="checkGuge()" class="mapLi">谷歌地图导航</li>
+    <!-- <li onclick="checkGuge1()" class="mapLi">URL谷歌地图导航</li> -->
+</ul>
+
+<h3>可通过浏览器导航:</h3>
+<ul>
+    <li onclick="goBaiduBrowser()" class="map">百度导航</li>
+    <li onclick="goGaodeBrowser()" class="map">高德导航</li><!-- 直接通过url导航 -->
+    <li onclick="goTengxunBrowser()" class="map">腾讯导航</li>
+    <li onclick="goGugeBrowser()" class="map">谷歌导航</li>
+</ul>
+
+
+<script type="text/javascript" src="cordova.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+<script>
+
+    var originName='我的当前位置';//北四环东路 望和路
+    var origin = new Array(39.98871,116.43234);//origin[0]为纬度,origin[1]为经度
+    var destinationName = '故宫博物馆';
+    var destination=new Array(39.9168,116.3908);//目的地纬度、经度。先纬度后经度
+    function haveInstalledApp(){//通过包名判断app是否安装
+        var mapList=document.getElementsByClassName('mapLi');
+        var baiduPackageName = "com.baidu.BaiduMap";
+        var gaodePackageName = "com.autonavi.minimap";
+        var tengxunPackageName = "com.tencent.map";
+        var gugePackageName = "com.google.android.apps.maps";
+        appAvailability.check(baiduPackageName,function () {//success callback
+            mapList.item(0).style.display = 'block';
+        },function () {//
+            mapList.item(0).style.display = 'none';
+        });
+        appAvailability.check(gaodePackageName,function () {//success callback
+            mapList.item(1).style.display = 'block';
+        },function () {//
+            mapList.item(1).style.display = 'none';
+        });
+        appAvailability.check(tengxunPackageName,function () {//success callback
+            mapList.item(2).style.display = 'block';
+        },function () {//
+            mapList.item(2).style.display = 'none';
+
+        });
+        appAvailability.check(gugePackageName,function () {//success callback
+            mapList.item(3).style.display = 'block';
+            // mapList.item(4).style.display = 'block';
+        },function () {
+            mapList.item(3).style.display = 'none';
+            // mapList.item(4).style.display = 'none';
+        });
+    }
+
+    document.addEventListener('deviceready', function(){
+        haveInstalledApp();
+    }, false);
+
+    function checkBaidu(){ 
+        var sApp = startApp.set({ /* params */
+            "action":"ACTION_VIEW",
+            "category":"CATEGORY_DEFAULT",
+            "type":"text/css",
+            "package":"com.baidu.BaiduMap",
+            "uri":"baidumap://map/direction?origin=name:"+originName+"|latlng:"+origin[0]+","+origin[1]+"&destination=name:"+destinationName+"|latlng:"+destination[0]+","+destination[1]+"&mode=driving",
+            "flags":["FLAG_ACTIVITY_CLEAR_TOP","FLAG_ACTIVITY_CLEAR_TASK"],
+            "intentstart":"startActivity"
+        });
+        sApp.start(function() { /* success */
+            //alert("OK");
+        }, function(error) { /* fail */
+            alert(error);
+        });
+    }
+
+    function goBaiduBrowser(){
+        window.location.href="http://api.map.baidu.com/direction?origin=name:"+originName+"|latlng:"+origin[0]+","+origin[1]+"&destination=name:"+destinationName+"|latlng:"+destination[0]+","+destination[1]+"&mode=driving&region=北京&output=html&src=webapp.baidu.openAPIdemo";
+    }
+
+    function checkGaode(){
+        var sApp = startApp.set({ /* params */
+            "action":"ACTION_VIEW",
+            "category":"CATEGORY_DEFAULT",
+            "type":"text/css",
+            "package":"com.autonavi.minimap",
+            "uri":"amapuri://route/plan/?slat="+origin[0]+"&slon="+origin[1]+"&sname="+originName+"&dlat="+destination[0]+"&dlon="+destination[1]+"&dname="+destinationName+"&dev=0&t=0",
+            "flags":["FLAG_ACTIVITY_CLEAR_TOP","FLAG_ACTIVITY_CLEAR_TASK"],
+            "intentstart":"startActivity"
+        });
+        sApp.start(function() { /* success */
+            //alert("OK");
+        }, function(error) { /* fail */
+            alert(error);
+        });
+    }
+	function goGaodeBrowser(){
+        window.location.href="http://uri.amap.com/navigation?from="+origin[1]+","+origin[0]+","+originName+"&to="+destination[1]+","+destination[0]+","+destinationName+"&mode=car&src=mypage&coordinate=gaode&callnative=1";
+
+    }
+    function checkTengxun(){
+        var sApp = startApp.set({ /* params */
+            "action":"ACTION_VIEW",
+            "category":"CATEGORY_DEFAULT",
+            "type":"text/css",
+            "package":"com.tencent.map",
+            "uri":"qqmap://map/routeplan?type=drive&from="+originName+"&fromcoord="+origin[0]+","+origin[1]+"&to="+destinationName+"&tocoord="+destination[0]+","+destination[1]+"&coord_type=1&policy=0",
+            "flags":["FLAG_ACTIVITY_CLEAR_TOP","FLAG_ACTIVITY_CLEAR_TASK"],
+            "intentstart":"startActivity"
+        });
+        sApp.start(function() { /* success */
+            //alert("OK");
+        }, function(error) { /* fail */
+            alert(error);
+        });
+    }
+
+    function goTengxunBrowser(){
+        window.location.href="http://apis.map.qq.com/uri/v1/routeplan?type=drive&from="+originName+"&fromcoord="+origin[0]+","+origin[1]+"&to="+destinationName+"&tocoord="+destination[0]+","+destination[1]+"&policy=1&referer=mapAPP";
+    }
+    function checkGuge(){//指定终点经纬度，默认当前位置
+        var sApp = startApp.set({ /* params */
+            "action":"ACTION_VIEW",
+            "category":"CATEGORY_DEFAULT",
+            "type":"text/css",
+            "package":"com.google.android.apps.maps",
+            "uri":"google.navigation:q="+destination[0]+","+destination[1],
+            "flags":["FLAG_ACTIVITY_CLEAR_TOP","FLAG_ACTIVITY_CLEAR_TASK"],
+            "intentstart":"startActivity"
+        });
+        sApp.start(function() { /* success */
+            //alert("OK");
+        }, function(error) { /* fail */
+            alert(error);
+        });
+    }
+
+    function checkGuge1(){//指定起点、终点经纬度
+        var sApp = startApp.set({
+            "action":"ACTION_VIEW",
+            "category":"CATEGORY_DEFAULT",
+            "type":"text/css",
+            "package":"com.google.android.apps.maps",
+            "uri":"https://www.google.com/maps/dir/?api=1&destination="+destination[0]+","+destination[1]+"&travelmode=driving",
+            "flags":["FLAG_ACTIVITY_CLEAR_TOP","FLAG_ACTIVITY_CLEAR_TASK"],
+            "intentstart":"startActivity"
+        });
+        sApp.start(function() {
+
+        }, function(error) { /* fail */
+            alert(error);
+        });
+    }
+
+    function goGugeBrowser(){//指定起点、终点经纬度
+        //window.location.href="https://www.google.com/maps/dir/?api=1&origin=Space+Needle+Seattle+WA&destination=Pike+Place+Market+Seattle+WA&travelmode=bicycling";
+
+       // window.location.href="https://www.google.com/maps/dir/?api=1&destination=39.9761,116.3282&travelmode=driving";
+
+        window.location.href="https://www.google.com/maps/dir/?api=1&origin="+origin[0]+","+origin[1]+"&destination="+destination[0]+","+destination[1]+"&travelmode=driving";
+
+    }
+
+</script>
+</body>
+</html>
